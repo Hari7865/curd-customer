@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+	<error-handler name="global-error-handlingError_Handler" doc:id="88bafcaf-ec69-4fee-bb66-968a2010dcc3">
+	<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="cd4d4b1f-c199-4ac4-bbc2-0d0a05e54f46" type="DB:CONNECTIVITY">
+				<ee:transform doc:name="Transform Message" doc:id="7307e37f-7e2c-4ec5-b92c-db8d66f7c9b8" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+  "Message" : "Database connectivity issue from backend,please try again"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-propagate>
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="d8e2ea8f-1bc6-4bfd-adbf-a87a599df527" type="DB:RETRY_EXHAUSTED">
+				<ee:transform doc:name="Transform Message" doc:id="8a889281-64f5-4bae-8860-888875614f2f" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+"Maximum database retried, connection issue"]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-propagate>
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="1bbd1f77-163b-487f-9074-6bf7fa4aacec" type="DB:QUERY_EXECUTION">
+				<ee:transform doc:name="Transform Message" doc:id="e904311f-745c-427a-a4fe-510d5fc88d62" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+"There is an error while executing the query, check the query"]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-propagate>
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="f302516e-5fe2-4fc7-ba7f-03b7e3b2eff4" type="DB:BAD_SQL_SYNTAX">
+				<ee:transform doc:name="Transform Message" doc:id="f80f4633-10fa-44e1-a088-4a68f461413d" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+  "Message" : "Please check the query before executing the request"
+}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="httpStatus" ><![CDATA[400]]></ee:set-variable>
+						<ee:set-variable variableName="httpMessage" ><![CDATA["Bad Syntax"]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</on-error-propagate>
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="4010fc80-6590-4ac5-bda8-851caa3e1c31" type="ANY"/>
+			
+</error-handler>
+</mule>

@@ -1,0 +1,4 @@
+%dw 2.0
+
+type auto_6040789a_022e_492c_8979_3ca97ae38ae9_Output_Variables_cusId = Any
+

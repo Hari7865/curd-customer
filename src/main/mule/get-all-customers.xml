@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<db:config name="Database_Config1" doc:name="Database Config" doc:id="50b43011-665e-426b-9b96-cb86fb24cdd9" >
+		<db:my-sql-connection host="database-1.cwlr89cqkfkn.us-east-2.rds.amazonaws.com" port="3306" user="admin" password="mypassword" database="customerdb" />
+	</db:config>
+	<flow name="get-all-customersFlow" doc:id="cea7fa48-adec-4374-8c8c-9f1cb8044cd6" >
+		<logger level="INFO" doc:name="Logger" doc:id="a968e320-f861-4e08-964c-f7c50da27a14" message="Request is sending to DB"/>
+		<db:select doc:name="Select" doc:id="68386e03-0866-4430-a0e1-0b1b8a4e67f2" config-ref="Database_Config1">
+			<db:sql ><![CDATA[select * from customer_tbl]]></db:sql>
+		</db:select>
+		<choice doc:name="Choice" doc:id="9ca430d7-2b56-4a4d-b9f4-c73cfb9a5fba" >
+			<when expression="#[sizeOf(payload) &gt;0]">
+				<ee:transform doc:name="Transform Message" doc:id="7b916eea-e7ab-4edb-9516-a66dc8cdaaee" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<otherwise >
+				<ee:transform doc:name="Transform Message" doc:id="1bbf98d4-e583-4ed6-bb2a-c67ea972dd68" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"Message" : "No data exists"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</otherwise>
+		</choice>
+	</flow>
+</mule>
